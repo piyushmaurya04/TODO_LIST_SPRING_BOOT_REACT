@@ -1,14 +1,11 @@
-# Use an official OpenJDK runtime as a parent image
-FROM eclipse-temurin:21-jre
-
-# Set the working directory
+# Multi-stage Dockerfile for Spring Boot + Maven
+FROM maven:3.9.7-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY . .
+RUN ./mvnw clean package -DskipTests
 
-# Copy the built jar from the build stage or local build context
-COPY target/todo-list-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose the port the app runs on
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/todo-list-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
-# Run the Spring Boot app
 ENTRYPOINT ["java","-jar","app.jar"]
